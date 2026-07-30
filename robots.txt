@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://sillasjuanylola.com/sitemap.xml
