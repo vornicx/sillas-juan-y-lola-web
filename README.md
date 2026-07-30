@@ -7,7 +7,7 @@ Web estática, sin dependencias ni proceso de compilación, preparada para despl
 - Inicio, catálogo real de 27 colecciones de mantelería, galería, nosotros y contacto.
 - Diseño responsive para móvil, tablet y escritorio.
 - Menú móvil accesible.
-- Catálogo filtrable y lista de presupuesto.
+- Catálogo con 81 fotografías, buscador, filtros visuales, visor ampliado y lista de presupuesto.
 - Persistencia opcional de la lista durante un máximo de 30 días.
 - Formulario que prepara la solicitud en WhatsApp y muestra información básica de privacidad.
 - Preguntas frecuentes con respuestas prudentes que no inventan condiciones comerciales.

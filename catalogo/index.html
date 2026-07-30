@@ -39,10 +39,28 @@
 <section class="catalog-intro shell" aria-labelledby="catalog-note-title">
   <div>
     <p class="eyebrow">Catálogo verificado</p>
-    <h2 id="catalog-note-title">27 colecciones con nombre y fotografía reales</h2>
-    <p>Esta selección procede del catálogo de mantelería publicado por Juan y Lola en 2021. Las fotografías son reales, pero la disponibilidad, las medidas y las variantes actuales deben confirmarse al preparar el presupuesto.</p>
+    <h2 id="catalog-note-title">27 colecciones y 81 fotografías reales</h2>
+    <p>Abre cualquier colección para ver el montaje completo y sus detalles. Esta selección procede del catálogo de mantelería publicado por Juan y Lola en 2021; la disponibilidad, las medidas y las variantes actuales deben confirmarse al preparar el presupuesto.</p>
   </div>
   <a class="selection-button is-disabled" data-quote-link href="#" target="_blank" rel="noreferrer" aria-disabled="true">Mi lista: <span data-selection-count>0</span> · Pedir disponibilidad</a>
+</section>
+<section class="catalog-tools shell" aria-label="Buscar y filtrar colecciones">
+  <label class="catalog-search">
+    <span class="visually-hidden">Buscar una colección</span>
+    <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m16 16 5 5"></path></svg>
+    <input type="search" data-catalog-search placeholder="Buscar una colección…" autocomplete="off">
+  </label>
+  <div class="catalog-filter-row">
+    <div class="filters" aria-label="Filtrar por estilo">
+      <button type="button" class="is-active" data-filter="all" aria-pressed="true">Todas</button>
+      <button type="button" data-filter="claras" aria-pressed="false">Claras</button>
+      <button type="button" data-filter="rosas" aria-pressed="false">Rosas y burdeos</button>
+      <button type="button" data-filter="azules" aria-pressed="false">Azules y verdes</button>
+      <button type="button" data-filter="oscuras" aria-pressed="false">Oscuras</button>
+      <button type="button" data-filter="estampadas" aria-pressed="false">Estampadas</button>
+    </div>
+    <p class="catalog-result-count" aria-live="polite"><strong data-result-count>27</strong> colecciones</p>
+  </div>
 </section>
 <section class="catalog-grid shell" aria-live="polite">
   <article class="catalog-card" data-catalog-card data-id="venecia-oro" data-name="Venecia Oro" data-family="Mantelería"><div class="catalog-image"><img src="/assets/images/catalogo-2021/venecia-oro.jpg" alt="Mesa vestida con la colección Venecia Oro" loading="lazy"></div><div class="catalog-body"><p class="eyebrow">Colección 2021</p><h2>Venecia Oro</h2><p>Referencia visual de mantelería y montaje.</p><button type="button" data-add aria-pressed="false">+ Añadir a mi lista</button></div></article>
@@ -73,6 +91,32 @@
   <article class="catalog-card" data-catalog-card data-id="venecia-lino" data-name="Venecia Lino" data-family="Mantelería"><div class="catalog-image"><img src="/assets/images/catalogo-2021/venecia-lino.jpg" alt="Mesa vestida con la colección Venecia Lino" loading="lazy"></div><div class="catalog-body"><p class="eyebrow">Colección 2021</p><h2>Venecia Lino</h2><p>Referencia visual de mantelería y montaje.</p><button type="button" data-add aria-pressed="false">+ Añadir a mi lista</button></div></article>
   <article class="catalog-card" data-catalog-card data-id="pino" data-name="Pino" data-family="Mantelería"><div class="catalog-image"><img src="/assets/images/catalogo-2021/pino.jpg" alt="Mesa vestida con la colección Pino" loading="lazy"></div><div class="catalog-body"><p class="eyebrow">Colección 2021</p><h2>Pino</h2><p>Referencia visual de mantelería y montaje.</p><button type="button" data-add aria-pressed="false">+ Añadir a mi lista</button></div></article>
 </section>
+<p class="catalog-empty shell" data-catalog-empty hidden>No hay colecciones que coincidan con esa búsqueda. Prueba con otro nombre o filtro.</p>
+
+<dialog class="catalog-dialog" data-catalog-dialog aria-labelledby="catalog-dialog-title">
+  <div class="catalog-dialog-shell">
+    <button class="catalog-dialog-close" type="button" data-dialog-close aria-label="Cerrar la colección">×</button>
+    <div class="catalog-viewer">
+      <div class="catalog-viewer-stage">
+        <img data-dialog-image src="" alt="">
+        <button class="catalog-viewer-arrow previous" type="button" data-dialog-previous aria-label="Fotografía anterior">‹</button>
+        <button class="catalog-viewer-arrow next" type="button" data-dialog-next aria-label="Fotografía siguiente">›</button>
+        <span class="catalog-image-index" data-dialog-index>1 / 3</span>
+      </div>
+      <div class="catalog-thumbnails" data-dialog-thumbnails aria-label="Fotografías de la colección"></div>
+    </div>
+    <div class="catalog-dialog-copy">
+      <p class="eyebrow">Colección de mantelería · Catálogo 2021</p>
+      <h2 id="catalog-dialog-title" data-dialog-title></h2>
+      <p>Consulta tres fotografías reales del montaje y sus detalles. Pregúntanos para confirmar disponibilidad, medidas, combinaciones y menaje.</p>
+      <div class="catalog-dialog-actions">
+        <button class="primary-button" type="button" data-dialog-add aria-pressed="false">Añadir a mi lista</button>
+        <a class="secondary-button" data-dialog-whatsapp href="#" target="_blank" rel="noreferrer">Consultar por WhatsApp</a>
+      </div>
+      <p class="catalog-dialog-note">Las imágenes sirven como referencia visual. El presupuesto final se prepara según fecha, cantidades, transporte y disponibilidad.</p>
+    </div>
+  </div>
+</dialog>
 <div class="mobile-selection-bar"><span><span data-selection-count>0</span> artículos</span><a data-quote-link class="is-disabled" href="#" target="_blank" rel="noreferrer" aria-disabled="true">Pedir presupuesto</a></div>
 </main>
   <footer class="footer">

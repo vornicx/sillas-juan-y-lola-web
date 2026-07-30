@@ -18,6 +18,6 @@ Antes de publicar, el titular debe confirmar que dispone de derechos suficientes
 
 ## Catálogo 2021
 
-La carpeta `catalogo-2021/` contiene 27 imágenes a 1403 × 992 píxeles obtenidas del PDF `Sillas-Juan-y-Lola-2021.pdf` aportado para esta revisión. Cada imagen corresponde a la primera página de una colección cuyo nombre aparece expresamente en el PDF.
+La carpeta `catalogo-2021/` contiene 81 imágenes de aproximadamente 1404 × 993 píxeles obtenidas del PDF `Sillas-Juan-y-Lola-2021.pdf` aportado para esta revisión. Cada una de las 27 colecciones incluye una portada, una vista del montaje completo y un detalle de mesa.
 
 Estas imágenes mejoran la nitidez del catálogo y la galería, pero el documento es de 2021. Antes de publicar, Juan y Lola debe confirmar que las colecciones siguen disponibles y que pueden reutilizarse las fotografías.
