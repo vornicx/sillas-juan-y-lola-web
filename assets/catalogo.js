@@ -15,6 +15,10 @@
   const dialogThumbnails = dialog?.querySelector('[data-dialog-thumbnails]');
   const dialogAdd = dialog?.querySelector('[data-dialog-add]');
   const dialogWhatsapp = dialog?.querySelector('[data-dialog-whatsapp]');
+  const dialogEyebrow = dialog?.querySelector('[data-dialog-eyebrow]');
+  const dialogDescription = dialog?.querySelector('[data-dialog-description]');
+  const dialogPrevious = dialog?.querySelector('[data-dialog-previous]');
+  const dialogNext = dialog?.querySelector('[data-dialog-next]');
   const storageKey = 'juan-lola-selection';
   const maxAge = 30 * 24 * 60 * 60 * 1000;
   const collectionTags = {
@@ -57,6 +61,7 @@
   }
 
   function imagePaths(card) {
+    if (card.dataset.images) return card.dataset.images.split('|').filter(Boolean);
     const base = `/assets/images/catalogo-2021/${card.dataset.id}`;
     return [`${base}.jpg`, `${base}-2.jpg`, `${base}-3.jpg`];
   }
@@ -88,7 +93,7 @@
 
   function quoteUrl() {
     const text = [
-      'Hola, me gustaría consultar disponibilidad y pedir presupuesto para estas colecciones:',
+      'Hola, me gustaría consultar disponibilidad y pedir presupuesto para este material:',
       '',
       ...selectedNames().map((name) => `• ${name}`),
       '',
@@ -103,7 +108,7 @@
 
   function singleCollectionUrl(name) {
     const text = [
-      `Hola, me gustaría consultar la colección ${name}.`,
+      `Hola, me gustaría consultar ${name}.`,
       '',
       'Fecha del evento:',
       'Localidad:',
@@ -159,8 +164,9 @@
     const query = normalize(searchInput?.value || '');
     let visible = 0;
     cards.forEach((card) => {
-      const matchesText = !query || normalize(`${card.dataset.name} ${card.dataset.id}`).includes(query);
-      const matchesFilter = activeFilter === 'all' || collectionTags[card.dataset.id]?.includes(activeFilter);
+      const category = card.dataset.category || 'manteleria';
+      const matchesText = !query || normalize(`${card.dataset.name} ${card.dataset.id} ${category}`).includes(query);
+      const matchesFilter = activeFilter === 'all' || category === activeFilter || collectionTags[card.dataset.id]?.includes(activeFilter);
       card.hidden = !(matchesText && matchesFilter);
       if (!card.hidden) visible += 1;
     });
@@ -174,6 +180,10 @@
     dialogImage.src = paths[activeImage];
     dialogImage.alt = `${activeCard.dataset.name}: fotografía ${activeImage + 1} de ${paths.length}`;
     if (dialogIndex) dialogIndex.textContent = `${activeImage + 1} / ${paths.length}`;
+    const hasGallery = paths.length > 1;
+    if (dialogPrevious) dialogPrevious.hidden = !hasGallery;
+    if (dialogNext) dialogNext.hidden = !hasGallery;
+    if (dialogThumbnails) dialogThumbnails.hidden = !hasGallery;
     [...(dialogThumbnails?.querySelectorAll('button') || [])].forEach((button, index) => {
       const current = index === activeImage;
       button.classList.toggle('is-active', current);
@@ -195,6 +205,12 @@
     opener = trigger;
     const paths = imagePaths(card);
     dialogTitle.textContent = card.dataset.name;
+    if (dialogEyebrow) {
+      dialogEyebrow.textContent = card.querySelector('.eyebrow')?.textContent || 'Catálogo Juan y Lola';
+    }
+    if (dialogDescription) {
+      dialogDescription.textContent = card.dataset.description || 'Consulta fotografías reales del montaje y sus detalles. Pregunta para confirmar disponibilidad, medidas, combinaciones y variantes.';
+    }
     dialogWhatsapp.href = singleCollectionUrl(card.dataset.name);
     dialogThumbnails.replaceChildren(...paths.map((path, index) => {
       const button = document.createElement('button');
@@ -240,13 +256,14 @@
     const imageArea = card.querySelector('.catalog-image');
     const description = card.querySelector('.catalog-body > p:not(.eyebrow)');
     const hint = document.createElement('span');
+    const photoCount = imagePaths(card).length;
     hint.className = 'catalog-image-hint';
-    hint.textContent = 'Ver 3 fotos';
+    hint.textContent = photoCount === 1 ? 'Ver foto' : `Ver ${photoCount} fotos`;
     imageArea.setAttribute('role', 'button');
     imageArea.setAttribute('tabindex', '0');
-    imageArea.setAttribute('aria-label', `Ver fotografías de la colección ${card.dataset.name}`);
+    imageArea.setAttribute('aria-label', `Ver ficha y fotografías de ${card.dataset.name}`);
     imageArea.append(hint);
-    if (description) description.textContent = 'Montaje completo y detalles de mesa.';
+    if (description && !card.dataset.description) description.textContent = 'Montaje completo y detalles de mesa.';
     imageArea.addEventListener('click', () => openCollection(card, imageArea));
     imageArea.addEventListener('keydown', (event) => {
       if (event.key === 'Enter' || event.key === ' ') {

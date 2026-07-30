@@ -23,8 +23,9 @@
 
 - [x] Eliminar el testimonio provisional. Solo debe volver a añadirse con una reseña real y autorizada.
 - [x] Sustituir los productos inventados del prototipo por las 27 colecciones con nombre y fotografía del catálogo 2021.
+- [x] Añadir una primera clasificación visual de sillas, mesas, menaje y equipamiento usando únicamente fotografías reales recuperadas.
 - [ ] Confirmar cuáles de las 27 colecciones de 2021 siguen disponibles, sus medidas y sus variantes actuales.
-- [ ] Preparar el catálogo real de sillas, mesas, menaje y artículos en venta con nombre, foto, medidas y variantes.
+- [ ] Completar el catálogo de sillas, mesas, menaje y artículos en venta con el nombre comercial exacto, fotografías individuales, medidas y variantes confirmadas por Juan y Lola.
 - [ ] Confirmar que el negocio tiene derechos suficientes sobre las fotografías de la web antigua y del catálogo 2021.
 - [x] Añadir los enlaces oficiales de Facebook e Instagram.
 - [ ] Confirmar el perfil oficial de Google y añadir su enlace.

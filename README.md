@@ -4,10 +4,10 @@ Web estática, sin dependencias ni proceso de compilación, preparada para despl
 
 ## Incluye
 
-- Inicio, catálogo real de 27 colecciones de mantelería, galería, nosotros y contacto.
+- Inicio, catálogo visual de sillas, mesas, menaje, equipamiento y 27 colecciones de mantelería, galería, nosotros y contacto.
 - Diseño responsive para móvil, tablet y escritorio.
 - Menú móvil accesible.
-- Catálogo con 81 fotografías, buscador, filtros visuales, visor ampliado y lista de presupuesto.
+- Catálogo con 47 referencias, buscador por categorías, visor ampliado y lista de presupuesto.
 - Persistencia opcional de la lista durante un máximo de 30 días.
 - Formulario que prepara la solicitud en WhatsApp y muestra información básica de privacidad.
 - Preguntas frecuentes con respuestas prudentes que no inventan condiciones comerciales.
@@ -31,7 +31,7 @@ La versión entregada solo utiliza:
 
 No se han integrado herramientas de analítica, píxeles publicitarios ni formularios que envíen datos a un backend. El formulario abre WhatsApp con un borrador que el usuario revisa antes de enviarlo.
 
-El catálogo visual se ha reconstruido a partir del PDF oficial de 2021 aportado para el proyecto. La web avisa expresamente de que disponibilidad, medidas y variantes deben confirmarse en cada presupuesto.
+El catálogo visual se ha reconstruido a partir del PDF oficial de 2021 y de la biblioteca multimedia de la web anterior. La web avisa expresamente de que los nombres comerciales no publicados, la disponibilidad, las medidas y las variantes deben confirmarse en cada presupuesto.
 
 ## Ejecutar en local
 
