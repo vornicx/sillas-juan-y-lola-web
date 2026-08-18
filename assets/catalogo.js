@@ -21,7 +21,7 @@
       node.style.backgroundSize = '900% 100%';
     }
     const col = local % 9;
-    node.style.backgroundImage = `url('${spriteFiles[atlas]}')`;
+    node.style.backgroundImage = `url('${spriteFiles[atlas]}?v=61f769e')`;
     node.style.backgroundPosition = `${col * 12.5}% ${row * 100}%`;
   }
   const catalogGrid = document.querySelector('[data-catalog-grid]');
