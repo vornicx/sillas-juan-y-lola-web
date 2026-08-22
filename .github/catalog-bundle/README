@@ -1,0 +1,1 @@
+Transport staging. READY is updated only after all payload parts are present; installer verifies SHA-256 and all 81 AVIF files before committing them.
