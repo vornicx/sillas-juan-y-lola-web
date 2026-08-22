@@ -1,0 +1,27 @@
+name: Canva image URL test
+on:
+  push:
+    branches: [catalog-images-final]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test signed Canva source at thumbnail and larger transform
+        shell: bash
+        run: |
+          set -euxo pipefail
+          BASE='https://media.canva.com/v2/image-resize/format:PNG/height:133/quality:100/uri:ifs%3A%2F%2FM%2F6d8c1bb6-b9cf-47d4-ac41-b5d42d5664d6/watermark:F/width:200?csig=AAAAAAAAAAAAAAAAAAAAAH8eEkFjAdPVsAJfHysryCk97n7-8euU_9UEM-QrheAr&exp=1787449090&osig=AAAAAAAAAAAAAAAAAAAAAD-7ionjsxWkKRri9I6k56j2PzuefTdZSVUxFA-91rWb&signer=media-rpc&x-canva-quality=thumbnail'
+          curl -LfsS "$BASE" -o thumb.png
+          file thumb.png
+          identify thumb.png || true
+          LARGE="${BASE/height:133/height:800}"
+          LARGE="${LARGE/width:200/width:1200}"
+          curl -L -sS -D large.headers "$LARGE" -o large.bin || true
+          echo '--- large headers ---'
+          cat large.headers
+          echo '--- large file ---'
+          file large.bin || true
+          identify large.bin || true
+          wc -c thumb.png large.bin || true
