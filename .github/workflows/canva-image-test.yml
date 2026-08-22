@@ -2,6 +2,8 @@ name: Canva image URL test
 on:
   push:
     branches: [catalog-images-final]
+  pull_request:
+    branches: [main]
 permissions:
   contents: read
 jobs:
