@@ -4,7 +4,8 @@
     "deploymentEnabled": {
       "*": false,
       "main": true,
-      "catalog-images-batch-01": true
+      "catalog-images-batch-01": true,
+      "catalog-images-final": true
     }
   },
   "cleanUrls": true,
