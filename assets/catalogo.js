@@ -6,7 +6,12 @@
     4: '/assets/images/catalogo-2025/agua-marina-napoleon.avif',
     5: '/assets/images/catalogo-2025/buganvilla-forja-palillos.avif',
     6: '/assets/images/catalogo-2025/buganvilla-crossback-natural.avif',
-    7: '/assets/images/catalogo-2025/buganvilla-crossback-marron-ratan.avif'
+    7: '/assets/images/catalogo-2025/buganvilla-crossback-marron-ratan.avif',
+    8: '/assets/images/catalogo-2025/cartuja-azul-crossback-blanca.avif',
+    9: '/assets/images/catalogo-2025/cartuja-azul-forja-cruzada.avif',
+    10: '/assets/images/catalogo-2025/empolvado-rosa-forja-cruzada.avif',
+    11: '/assets/images/catalogo-2025/empolvado-rosa-forja-palillos.avif',
+    12: '/assets/images/catalogo-2025/empolvado-rosa-crossback-natural.avif'
   };
 
   function applyDirect(node, page) {
