@@ -3,7 +3,8 @@
   "git": {
     "deploymentEnabled": {
       "*": false,
-      "main": true
+      "main": true,
+      "catalog-images-batch-01": true
     }
   },
   "cleanUrls": true,
