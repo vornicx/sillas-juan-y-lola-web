@@ -1,9 +1,10 @@
-name: Install verified catalog bundle
+name: Install verified catalog images
 
 on:
   push:
     branches: [catalog-images-final]
     paths:
+      - '.github/image-payload/manifest.ready'
       - '.github/catalog-bundle/READY'
 
 permissions:
@@ -18,7 +19,44 @@ jobs:
           ref: catalog-images-final
           fetch-depth: 0
 
-      - name: Reconstruct and verify catalog bundle
+      - name: Reconstruct and verify staged images
+        if: ${{ hashFiles('.github/image-payload/manifest.ready') != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import base64, hashlib, pathlib
+          root = pathlib.Path('.github/image-payload')
+          out = pathlib.Path('assets/images/catalogo-2025')
+          out.mkdir(parents=True, exist_ok=True)
+          manifest = root / 'manifest.ready'
+          completed = []
+          for raw in manifest.read_text().splitlines():
+              raw = raw.strip()
+              if not raw or raw.startswith('#'):
+                  continue
+              filename, expected = raw.split('|', 1)
+              parts = sorted(root.glob(filename + '.part*'))
+              if not parts:
+                  raise SystemExit(f'No payload parts for {filename}')
+              encoded = ''.join(p.read_text().strip() for p in parts)
+              data = base64.b64decode(encoded, validate=True)
+              actual = hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
+              if actual != expected:
+                  raise SystemExit(f'Git blob SHA mismatch for {filename}: {actual} != {expected}')
+              if len(data) < 10000 or data[4:12] != b'ftypavif':
+                  raise SystemExit(f'Invalid AVIF: {filename}')
+              (out / filename).write_bytes(data)
+              completed.append(filename)
+              print(filename, len(data), actual)
+          for filename in completed:
+              for part in root.glob(filename + '.part*'):
+                  part.unlink()
+          manifest.unlink()
+          PY
+
+      - name: Reconstruct and verify full catalog bundle
+        if: ${{ hashFiles('.github/catalog-bundle/READY') != '' && hashFiles('.github/catalog-bundle/catalog-q34.zip.b64.part01') != '' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -37,24 +75,25 @@ jobs:
               raise SystemExit(f'Expected 81 AVIF files, found {len(files)}')
           for path in files:
               data = path.read_bytes()
-              if len(data) < 10000:
-                  raise SystemExit(f'Unexpectedly small AVIF: {path.name} ({len(data)} bytes)')
-              if data[4:12] != b'ftypavif':
-                  raise SystemExit(f'Not a real AVIF: {path.name}')
+              if len(data) < 10000 or data[4:12] != b'ftypavif':
+                  raise SystemExit(f'Invalid AVIF: {path.name}')
           print(f'Verified {len(files)} AVIF files')
           PY
           mkdir -p assets/images/catalogo-2025
           find assets/images/catalogo-2025 -maxdepth 1 -type f -name '*.avif' -delete
           cp /tmp/catalog/*.avif assets/images/catalogo-2025/
+          rm -rf .github/catalog-bundle .github/image-payload
 
-      - name: Commit verified image set and remove transport files
+      - name: Commit verified images
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          rm -rf .github/catalog-bundle .github/image-payload
-          rm -f .github/workflows/image-payload-reconstruct.yml
           git add -A
-          git commit -m 'fix: install verified sharp catalog image set'
+          if git diff --cached --quiet; then
+            echo 'No verified image changes to commit.'
+            exit 0
+          fi
+          git commit -m 'fix: install verified sharp catalog images'
           git push origin HEAD:catalog-images-final
