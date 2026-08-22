@@ -10,26 +10,15 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Probe signed Canva source variants
+      - name: Probe Canva public view payload
         shell: bash
         run: |
           set -u
-          URI='ifs%3A%2F%2FM%2F6d8c1bb6-b9cf-47d4-ac41-b5d42d5664d6'
-          CSIG='AAAAAAAAAAAAAAAAAAAAAH8eEkFjAdPVsAJfHysryCk97n7-8euU_9UEM-QrheAr'
-          OSIG='AAAAAAAAAAAAAAAAAAAAAD-7ionjsxWkKRri9I6k56j2PzuefTdZSVUxFA-91rWb'
-          EXP='1787449090'
-          BASE="https://media.canva.com/v2/image-resize/format:PNG/height:133/quality:100/uri:${URI}/watermark:F/width:200?csig=${CSIG}&exp=${EXP}&osig=${OSIG}&signer=media-rpc&x-canva-quality=thumbnail"
-          V1="https://media.canva.com/v2/image-resize/format:PNG/height:800/quality:100/uri:${URI}/watermark:F/width:1200?exp=${EXP}&osig=${OSIG}&signer=media-rpc"
-          V2="https://media.canva.com/v2/image-resize/format:PNG/height:800/quality:100/uri:${URI}/width:1200?exp=${EXP}&osig=${OSIG}&signer=media-rpc"
-          V3="https://media.canva.com/v2/image-resize/format:JPEG/quality:90/uri:${URI}/width:1200?exp=${EXP}&osig=${OSIG}&signer=media-rpc"
-          V4="https://media.canva.com/v2/image-resize/format:PNG/uri:${URI}?exp=${EXP}&osig=${OSIG}&signer=media-rpc"
-          V5="https://media.canva.com/v2/image/uri:${URI}?exp=${EXP}&osig=${OSIG}&signer=media-rpc"
-          i=0
-          for url in "$BASE" "$V1" "$V2" "$V3" "$V4" "$V5"; do
-            i=$((i+1))
-            code=$(curl -L -sS -w '%{http_code}' -o "v${i}.bin" "$url" || true)
-            echo "VARIANT $i HTTP $code"
-            file "v${i}.bin" || true
-            wc -c "v${i}.bin" || true
-            head -c 100 "v${i}.bin" | strings | head -2 || true
-          done
+          VIEW='https://www.canva.com/d/RGQrwbfybycmSH7'
+          code=$(curl -L -sS -w '%{http_code}' -o view.html "$VIEW" || true)
+          echo "VIEW HTTP $code"
+          wc -c view.html
+          grep -o 'ifs[^"<> ]*' view.html | head -20 || true
+          grep -o '6d8c1bb6[^"<> ]*' view.html | head -20 || true
+          grep -o 'media.canva.com[^"<> ]*' view.html | head -20 || true
+          grep -o 'document-export[^"<> ]*' view.html | head -20 || true
