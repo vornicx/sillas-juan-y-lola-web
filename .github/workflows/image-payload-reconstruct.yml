@@ -1,0 +1,55 @@
+name: Reconstruct catalog image payloads
+
+on:
+  push:
+    branches: [catalog-images-final]
+    paths:
+      - '.github/image-payload/manifest.ready'
+
+permissions:
+  contents: write
+
+jobs:
+  reconstruct:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: catalog-images-final
+          fetch-depth: 0
+      - name: Reconstruct and verify AVIF files
+        shell: bash
+        run: |
+          python - <<'PY'
+          import base64, hashlib, pathlib
+          root = pathlib.Path('.github/image-payload')
+          manifest = root / 'manifest.ready'
+          out = pathlib.Path('assets/images/catalogo-2025')
+          out.mkdir(parents=True, exist_ok=True)
+          for raw in manifest.read_text().splitlines():
+              raw = raw.strip()
+              if not raw or raw.startswith('#'):
+                  continue
+              filename, expected = raw.split('|', 1)
+              parts = sorted(root.glob(filename + '.part*'))
+              if not parts:
+                  raise SystemExit(f'No payload parts for {filename}')
+              encoded = ''.join(p.read_text().strip() for p in parts)
+              data = base64.b64decode(encoded, validate=True)
+              actual = hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
+              if actual != expected:
+                  raise SystemExit(f'Git blob SHA mismatch for {filename}: {actual} != {expected}')
+              if data[4:12] != b'ftypavif':
+                  raise SystemExit(f'Not an AVIF file: {filename}')
+              (out / filename).write_bytes(data)
+              print(filename, len(data), actual)
+          PY
+      - name: Commit reconstructed images
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/images/catalogo-2025
+          git rm -r .github/image-payload
+          git commit -m 'fix: reconstruct verified sharp catalog images'
+          git push origin HEAD:catalog-images-final
