@@ -96,4 +96,12 @@ jobs:
             exit 0
           fi
           git commit -m 'fix: install verified sharp catalog images'
-          git push origin HEAD:catalog-images-final
+          for attempt in 1 2 3; do
+            git pull --rebase origin catalog-images-final
+            if git push origin HEAD:catalog-images-final; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo 'Unable to push verified images after retries.' >&2
+          exit 1
