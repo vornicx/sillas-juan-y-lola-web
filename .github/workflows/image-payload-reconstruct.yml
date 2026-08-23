@@ -1,11 +1,15 @@
 name: Install verified catalog images
 
 on:
-  push:
-    branches: [catalog-images-final]
+  pull_request:
+    branches: [main]
     paths:
       - '.github/image-payload/manifest.ready'
       - '.github/catalog-bundle/READY'
+
+concurrency:
+  group: catalog-image-installer
+  cancel-in-progress: true
 
 permissions:
   contents: write
