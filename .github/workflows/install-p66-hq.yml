@@ -1,0 +1,39 @@
+name: Install p66 HQ
+
+on:
+  push:
+    branches:
+      - catalog-hq-payload
+
+permissions:
+  contents: write
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: catalog-hq-payload
+      - name: Reconstruct and verify p66
+        shell: bash
+        run: |
+          set -euo pipefail
+          base64 -d payload-p66.b64 > /tmp/p66.avif
+          actual="$(git hash-object /tmp/p66.avif)"
+          expected="5a7f0fdfa25cac2cefb906412f14432b6d9cb49b"
+          test "$actual" = "$expected"
+          mkdir -p assets/images/catalogo-2025
+          cp /tmp/p66.avif assets/images/catalogo-2025/vichy-negro-crossback-blanca.avif
+      - name: Commit verified image
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add assets/images/catalogo-2025/vichy-negro-crossback-blanca.avif
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: install verified p66 HQ"
+          git push origin HEAD:catalog-hq-payload
