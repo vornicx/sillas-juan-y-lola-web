@@ -86,6 +86,7 @@
   const loaded = new Set();
   const failed = new Set();
   const pending = new Map();
+  const observed = new WeakMap();
 
   function paint(node, url) {
     if (!node) return;
@@ -95,7 +96,7 @@
     node.style.setProperty('background-repeat', 'no-repeat', 'important');
   }
 
-  function applyDirect(node, page) {
+  function preload(node, page) {
     const pageNumber = Number(page);
     const url = directFiles[pageNumber];
     if (!node || !url || failed.has(url)) return false;
@@ -106,6 +107,7 @@
     if (!pending.has(url)) {
       const image = new Image();
       pending.set(url, image);
+      image.decoding = 'async';
       image.addEventListener('load', () => {
         loaded.add(url);
         pending.delete(url);
@@ -121,10 +123,40 @@
     return false;
   }
 
+  const observer = 'IntersectionObserver' in window
+    ? new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const page = observed.get(entry.target);
+          observer.unobserve(entry.target);
+          observed.delete(entry.target);
+          preload(entry.target, page);
+        });
+      }, { rootMargin: '500px 0px' })
+    : null;
+
+  function requestDirect(node, page, eager = false) {
+    if (!node) return false;
+    if (eager || !observer) return preload(node, page);
+    const pageNumber = Number(page);
+    const url = directFiles[pageNumber];
+    if (!url || failed.has(url)) return false;
+    if (loaded.has(url)) {
+      paint(node, url);
+      return true;
+    }
+    if (observed.get(node) !== pageNumber) {
+      observer.unobserve(node);
+      observed.set(node, pageNumber);
+      observer.observe(node);
+    }
+    return false;
+  }
+
   function applyStatic() {
-    document.querySelectorAll('[data-catalog-page]').forEach(node => applyDirect(node, node.dataset.catalogPage));
+    document.querySelectorAll('[data-catalog-page]').forEach(node => requestDirect(node, node.dataset.catalogPage));
     const hero = document.querySelector('.catalog-v2-hero, .home-v2-hero');
-    if (hero) applyDirect(hero, 5);
+    if (hero) requestDirect(hero, 5, true);
   }
 
   function refreshDialog() {
@@ -137,9 +169,9 @@
     const indexText = dialog.querySelector('[data-dialog-index]')?.textContent || '';
     const match = indexText.match(/Montaje\s+(\d+)/i);
     const activeIndex = Math.max(0, Number(match?.[1] || 1) - 1);
-    applyDirect(dialog.querySelector('[data-dialog-image]'), item.pages[activeIndex]);
+    preload(dialog.querySelector('[data-dialog-image]'), item.pages[activeIndex]);
     dialog.querySelectorAll('[data-dialog-thumbnails] button').forEach((button, i) => {
-      applyDirect(button.querySelector('.catalog-v2-photo'), item.pages[i]);
+      preload(button.querySelector('.catalog-v2-photo'), item.pages[i]);
     });
   }
 
