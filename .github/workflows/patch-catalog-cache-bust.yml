@@ -1,0 +1,51 @@
+name: Patch catalog cache bust
+
+on:
+  push:
+    branches: [catalog-cache-bust]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Version direct catalog asset URLs
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('assets/catalogo.js')
+          s = p.read_text()
+          marker = "const catalogAssetVersion = '20260829-ac6bc328';"
+          if marker in s:
+              print('cache bust already present')
+              raise SystemExit(0)
+          anchor = "  const loaded = new Set();\n"
+          insert = "  const catalogAssetVersion = '20260829-ac6bc328';\n  const versionedUrl = pageNumber => {\n    const url = directFiles[pageNumber];\n    return url ? `${url}?v=${catalogAssetVersion}` : '';\n  };\n\n"
+          if anchor not in s:
+              raise SystemExit('loaded anchor not found')
+          s = s.replace(anchor, insert + anchor, 1)
+          needle = "    const url = directFiles[pageNumber];"
+          count = s.count(needle)
+          if count != 2:
+              raise SystemExit(f'expected 2 direct URL lookups, found {count}')
+          s = s.replace(needle, "    const url = versionedUrl(pageNumber);")
+          p.write_text(s)
+          PY
+      - name: Syntax check
+        run: node --check assets/catalogo.js
+      - name: Commit patch
+        shell: bash
+        run: |
+          if git diff --quiet -- assets/catalogo.js; then
+            echo 'No patch needed'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/catalogo.js
+          git commit -m 'fix: bust stale catalog image cache'
+          git push origin HEAD:catalog-cache-bust
