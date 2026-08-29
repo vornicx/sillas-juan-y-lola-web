@@ -1,0 +1,53 @@
+name: Patch catalog black-image guard
+
+on:
+  push:
+    branches: [catalog-guard-patch]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch catalog image validation
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('assets/catalogo.js')
+          s = p.read_text()
+          marker = 'function isRenderableImage(image)'
+          if marker in s:
+              print('guard already present')
+              raise SystemExit(0)
+
+          anchor = """  function preload(node, page) {\n"""
+          guard = """  function isRenderableImage(image) {\n    if (!image?.naturalWidth || !image?.naturalHeight) return false;\n    try {\n      const canvas = document.createElement('canvas');\n      canvas.width = 16;\n      canvas.height = 16;\n      const context = canvas.getContext('2d', { willReadFrequently: true });\n      if (!context) return true;\n      context.drawImage(image, 0, 0, 16, 16);\n      const pixels = context.getImageData(0, 0, 16, 16).data;\n      let visible = 0;\n      let luminance = 0;\n      let nearBlack = 0;\n      for (let i = 0; i < pixels.length; i += 4) {\n        if (pixels[i + 3] < 8) continue;\n        const y = (pixels[i] * 0.2126) + (pixels[i + 1] * 0.7152) + (pixels[i + 2] * 0.0722);\n        visible += 1;\n        luminance += y;\n        if (y < 18) nearBlack += 1;\n      }\n      if (!visible) return false;\n      const average = luminance / visible;\n      const blackFraction = nearBlack / visible;\n      return !(average < 55 && blackFraction > 0.72);\n    } catch {\n      return true;\n    }\n  }\n\n"""
+          if anchor not in s:
+              raise SystemExit('preload anchor not found')
+          s = s.replace(anchor, guard + anchor, 1)
+
+          old = """      image.addEventListener('load', () => {\n        loaded.add(url);\n        pending.delete(url);\n"""
+          new = """      image.addEventListener('load', () => {\n        pending.delete(url);\n        if (!isRenderableImage(image)) {\n          failed.add(url);\n          return;\n        }\n        loaded.add(url);\n"""
+          if old not in s:
+              raise SystemExit('load handler anchor not found')
+          s = s.replace(old, new, 1)
+          p.write_text(s)
+          PY
+      - name: Syntax check
+        run: node --check assets/catalogo.js
+      - name: Commit patch
+        shell: bash
+        run: |
+          if git diff --quiet -- assets/catalogo.js; then
+            echo 'No patch needed'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/catalogo.js
+          git commit -m 'fix: guard catalog against black image decodes'
+          git push origin HEAD:catalog-guard-patch
