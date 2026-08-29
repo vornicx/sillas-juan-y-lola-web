@@ -96,6 +96,35 @@
     node.style.setProperty('background-repeat', 'no-repeat', 'important');
   }
 
+  function isRenderableImage(image) {
+    if (!image?.naturalWidth || !image?.naturalHeight) return false;
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = 16;
+      canvas.height = 16;
+      const context = canvas.getContext('2d', { willReadFrequently: true });
+      if (!context) return true;
+      context.drawImage(image, 0, 0, 16, 16);
+      const pixels = context.getImageData(0, 0, 16, 16).data;
+      let visible = 0;
+      let luminance = 0;
+      let nearBlack = 0;
+      for (let i = 0; i < pixels.length; i += 4) {
+        if (pixels[i + 3] < 8) continue;
+        const y = (pixels[i] * 0.2126) + (pixels[i + 1] * 0.7152) + (pixels[i + 2] * 0.0722);
+        visible += 1;
+        luminance += y;
+        if (y < 18) nearBlack += 1;
+      }
+      if (!visible) return false;
+      const average = luminance / visible;
+      const blackFraction = nearBlack / visible;
+      return !(average < 55 && blackFraction > 0.72);
+    } catch {
+      return true;
+    }
+  }
+
   function preload(node, page) {
     const pageNumber = Number(page);
     const url = directFiles[pageNumber];
@@ -109,8 +138,12 @@
       pending.set(url, image);
       image.decoding = 'async';
       image.addEventListener('load', () => {
-        loaded.add(url);
         pending.delete(url);
+        if (!isRenderableImage(image)) {
+          failed.add(url);
+          return;
+        }
+        loaded.add(url);
         document.querySelectorAll(`[data-catalog-page="${pageNumber}"]`).forEach(el => paint(el, url));
         refreshDialog();
       }, { once: true });
