@@ -1,0 +1,43 @@
+name: Audit catalog AVIF
+
+on:
+  push:
+    branches: [catalog-avif-audit]
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+      - name: Audit all catalog AVIF files
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import glob, os, subprocess, sys
+          files = sorted(glob.glob('assets/images/catalogo-2025/*.avif'))
+          print(f'FILES={len(files)}')
+          if len(files) != 81:
+              print(f'ERROR expected 81 files, found {len(files)}')
+              sys.exit(2)
+          failed=[]; suspicious=[]
+          for path in files:
+              name=os.path.basename(path)
+              probe=subprocess.run(['ffprobe','-v','error','-select_streams','v:0','-show_entries','stream=width,height,pix_fmt','-of','csv=p=0',path],capture_output=True,text=True)
+              if probe.returncode!=0:
+                  failed.append((name,'ffprobe',probe.stderr.strip())); print(f'FAIL {name} ffprobe {probe.stderr.strip()}'); continue
+              decode=subprocess.run(['ffmpeg','-v','error','-i',path,'-vf','scale=32:32,format=gray','-frames:v','1','-f','rawvideo','-pix_fmt','gray','pipe:1'],capture_output=True)
+              if decode.returncode!=0 or len(decode.stdout)!=1024:
+                  err=decode.stderr.decode(errors='replace').strip(); failed.append((name,'decode',err)); print(f'FAIL {name} decode bytes={len(decode.stdout)} err={err}'); continue
+              px=decode.stdout; avg=sum(px)/len(px); black=sum(1 for v in px if v<12)/len(px); dark=sum(1 for v in px if v<25)/len(px); dims=probe.stdout.strip()
+              print(f'OK {name} probe={dims} avg={avg:.2f} black={black:.4f} dark={dark:.4f}')
+              if avg<70 or black>0.60 or dark>0.75: suspicious.append((name,avg,black,dark,dims))
+          print('--- SUMMARY ---'); print(f'FAILED={len(failed)}'); print(f'SUSPICIOUS={len(suspicious)}')
+          for item in failed: print('FAILED_ITEM',item)
+          for item in suspicious: print('SUSPICIOUS_ITEM',item)
+          if failed or suspicious: sys.exit(3)
+          PY
