@@ -23,16 +23,18 @@ jobs:
           if marker in s:
               print('cache bust already present')
               raise SystemExit(0)
-          anchor = "  const loaded = new Set();\n"
-          insert = "  const catalogAssetVersion = '20260829-ac6bc328';\n  const versionedUrl = pageNumber => {\n    const url = directFiles[pageNumber];\n    return url ? `${url}?v=${catalogAssetVersion}` : '';\n  };\n\n"
-          if anchor not in s:
-              raise SystemExit('loaded anchor not found')
-          s = s.replace(anchor, insert + anchor, 1)
+
           needle = "    const url = directFiles[pageNumber];"
           count = s.count(needle)
           if count != 2:
               raise SystemExit(f'expected 2 direct URL lookups, found {count}')
           s = s.replace(needle, "    const url = versionedUrl(pageNumber);")
+
+          anchor = "  const loaded = new Set();\n"
+          insert = "  const catalogAssetVersion = '20260829-ac6bc328';\n  function versionedUrl(pageNumber) {\n    const source = directFiles[pageNumber];\n    return source ? `${source}?v=${catalogAssetVersion}` : '';\n  }\n\n"
+          if anchor not in s:
+              raise SystemExit('loaded anchor not found')
+          s = s.replace(anchor, insert + anchor, 1)
           p.write_text(s)
           PY
       - name: Syntax check
