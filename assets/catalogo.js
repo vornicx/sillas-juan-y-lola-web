@@ -83,6 +83,12 @@
     81: '/assets/images/catalogo-2025/rustica-forja-palillos.avif'
   };
 
+  const catalogAssetVersion = '20260829-ac6bc328';
+  function versionedUrl(pageNumber) {
+    const source = directFiles[pageNumber];
+    return source ? `${source}?v=${catalogAssetVersion}` : '';
+  }
+
   const loaded = new Set();
   const failed = new Set();
   const pending = new Map();
@@ -127,7 +133,7 @@
 
   function preload(node, page) {
     const pageNumber = Number(page);
-    const url = directFiles[pageNumber];
+    const url = versionedUrl(pageNumber);
     if (!node || !url || failed.has(url)) return false;
     if (loaded.has(url)) {
       paint(node, url);
@@ -172,7 +178,7 @@
     if (!node) return false;
     if (eager || !observer) return preload(node, page);
     const pageNumber = Number(page);
-    const url = directFiles[pageNumber];
+    const url = versionedUrl(pageNumber);
     if (!url || failed.has(url)) return false;
     if (loaded.has(url)) {
       paint(node, url);
