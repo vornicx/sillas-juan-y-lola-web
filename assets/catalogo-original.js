@@ -26,24 +26,40 @@
   }
   const catalogGrid = document.querySelector('[data-catalog-grid]');
   if (catalogGrid && Array.isArray(window.JuanLolaCatalogData)) {
+    const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (character) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    })[character]);
     const kindLabel = (kind) => kind === 'manteleria' ? 'Mantelería' : kind === 'camino' ? 'Camino de mesa' : 'Mesa';
     catalogGrid.innerHTML = window.JuanLolaCatalogData.map((item) => {
       const count = String(item.pages.length).padStart(2,'0');
       const uniqueChairs = [...new Set(item.chairs)];
-      const chairTags = uniqueChairs.slice(0,3).map((chair) => `<span>${chair}</span>`).join('');
+      const chairTags = uniqueChairs.slice(0,3).map((chair) => `<span>${escapeHtml(chair)}</span>`).join('');
       const more = uniqueChairs.length > 3 ? `<span>+${uniqueChairs.length - 3}</span>` : '';
       const modelText = `${uniqueChairs.length} modelo${uniqueChairs.length === 1 ? '' : 's'} de silla`;
       const description = item.kind === 'mesa'
         ? `${item.pages.length} montaje${item.pages.length === 1 ? '' : 's'} real${item.pages.length === 1 ? '' : 'es'} con ${modelText}.`
         : `${item.pages.length} montajes reales con ${modelText}.`;
       const search = `${item.name} ${kindLabel(item.kind)} ${item.chairs.join(' ')}`;
-      return `<article class="catalog-v2-card" data-catalog-card data-id="${item.id}" data-name="${item.name}" data-kind="${item.kind}" data-pages="${item.pages.join(',')}" data-chairs="${item.chairs.join('|')}" data-search="${search}">
-        <button type="button" class="catalog-v2-image" data-open aria-label="Ver ${item.name}">
+      const safe = {
+        id: escapeHtml(item.id),
+        name: escapeHtml(item.name),
+        kind: escapeHtml(item.kind),
+        pages: escapeHtml(item.pages.join(',')),
+        chairs: escapeHtml(item.chairs.join('|')),
+        search: escapeHtml(search),
+        description: escapeHtml(description)
+      };
+      return `<article class="catalog-v2-card" data-catalog-card data-id="${safe.id}" data-name="${safe.name}" data-kind="${safe.kind}" data-pages="${safe.pages}" data-chairs="${safe.chairs}" data-search="${safe.search}">
+        <button type="button" class="catalog-v2-image" data-open aria-label="Ver ${safe.name}">
           <span class="catalog-v2-photo" data-catalog-page="${item.pages[0]}" aria-hidden="true"></span>
           <span class="catalog-v2-count">${count} montaje${item.pages.length === 1 ? '' : 's'}</span>
           <span class="catalog-v2-view">Ver combinaciones</span>
         </button>
-        <div class="catalog-v2-body"><div class="catalog-v2-meta"><span>${kindLabel(item.kind)}</span><span>${count}</span></div><h2>${item.name}</h2><p>${description}</p><div class="catalog-v2-tags" aria-label="Modelos de silla">${chairTags}${more}</div><button type="button" class="catalog-v2-add" data-add aria-pressed="false">Añadir a mi selección</button></div>
+        <div class="catalog-v2-body"><div class="catalog-v2-meta"><span>${kindLabel(item.kind)}</span><span>${count}</span></div><h2>${safe.name}</h2><p>${safe.description}</p><div class="catalog-v2-tags" aria-label="Modelos de silla">${chairTags}${more}</div><button type="button" class="catalog-v2-add" data-add aria-pressed="false">Añadir a mi selección</button></div>
       </article>`;
     }).join('');
   }

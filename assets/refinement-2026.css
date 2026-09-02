@@ -121,8 +121,8 @@ body{background:var(--archic-bg);text-rendering:optimizeLegibility;-webkit-font-
   .site-header .logo{max-width:190px}.logo-name{font-size:26px}.logo-eyebrow{font-size:7px}.logo-tagline{font-size:7px}
   .menu-button{display:inline-flex;align-items:center;gap:9px;justify-self:end;padding:10px 0}
   .menu-lines{width:18px;height:12px;position:relative;border-top:1px solid currentColor;border-bottom:1px solid currentColor}
-  .main-nav{position:fixed;z-index:60;inset:99px 0 auto 0;display:flex;flex-direction:column;align-items:stretch;gap:0;padding:8px 16px 24px;background:var(--archic-bg);border-bottom:1px solid var(--archic-line);box-shadow:0 24px 40px rgba(31,20,16,.12);transform:translateY(-130%);opacity:0;pointer-events:none;transition:transform .35s var(--archic-ease),opacity .25s ease}
-  body.menu-open .main-nav{transform:none;opacity:1;pointer-events:auto}
+  .main-nav{position:fixed;z-index:60;inset:99px 0 auto 0;display:flex;visibility:hidden;flex-direction:column;align-items:stretch;gap:0;padding:8px 16px 24px;background:var(--archic-bg);border-bottom:1px solid var(--archic-line);box-shadow:0 24px 40px rgba(31,20,16,.12);transform:translateY(-130%);opacity:0;pointer-events:none;transition:transform .35s var(--archic-ease),opacity .25s ease,visibility 0s linear .35s}
+  body.menu-open .main-nav{visibility:visible;transform:none;opacity:1;pointer-events:auto;transition-delay:0s}
   .main-nav a{padding:17px 4px;border-bottom:1px solid var(--archic-line);font-family:Georgia,'Times New Roman',serif;font-size:21px;font-weight:400;letter-spacing:-.01em;text-transform:none}
   .main-nav a::after{display:none}.header-actions{display:none}
 

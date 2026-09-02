@@ -1,5 +1,6 @@
 (() => {
   const CONSENT_KEY = 'juan-lola-consent-v1';
+  const FUNCTIONAL_STORAGE_KEYS = Object.freeze(['juan-lola-selection', 'juan-lola-selection-v2']);
   const CONSENT_MAX_AGE = 365 * 24 * 60 * 60 * 1000;
   const DEFAULT_CONSENT = Object.freeze({ essential: true, functional: false, external: false });
 
@@ -53,7 +54,7 @@
       version: 1
     };
     safeStorage.set(CONSENT_KEY, JSON.stringify(consent));
-    if (!consent.functional) safeStorage.remove('juan-lola-selection');
+    if (!consent.functional) FUNCTIONAL_STORAGE_KEYS.forEach((key) => safeStorage.remove(key));
     window.dispatchEvent(new CustomEvent('juanlola:consentchange', { detail: publicConsent() }));
     applyConsent();
     closeConsentUi();
@@ -73,20 +74,39 @@
   const nav = document.querySelector('[data-main-nav]');
 
   if (menuButton && nav) {
+    const closeMenu = ({ restoreFocus = false } = {}) => {
+      menuButton.setAttribute('aria-expanded', 'false');
+      nav.classList.remove('is-open');
+      document.body.classList.remove('menu-open');
+      if (restoreFocus) menuButton.focus();
+    };
+
     menuButton.addEventListener('click', () => {
       const open = menuButton.getAttribute('aria-expanded') === 'true';
-      menuButton.setAttribute('aria-expanded', String(!open));
-      nav.classList.toggle('is-open', !open);
-      document.body.classList.toggle('menu-open', !open);
+      if (open) {
+        closeMenu();
+        return;
+      }
+      menuButton.setAttribute('aria-expanded', 'true');
+      nav.classList.add('is-open');
+      document.body.classList.add('menu-open');
     });
 
     nav.querySelectorAll('a').forEach((link) => {
       link.addEventListener('click', () => {
-        menuButton.setAttribute('aria-expanded', 'false');
-        nav.classList.remove('is-open');
-        document.body.classList.remove('menu-open');
+        closeMenu();
       });
     });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && menuButton.getAttribute('aria-expanded') === 'true') {
+        closeMenu({ restoreFocus: true });
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 760 && menuButton.getAttribute('aria-expanded') === 'true') closeMenu();
+    }, { passive: true });
   }
 
   document.querySelectorAll('[data-year]').forEach((node) => {
@@ -111,11 +131,11 @@
   function consentMarkup() {
     const wrapper = document.createElement('div');
     wrapper.innerHTML = `
-      <section class="cookie-banner" data-cookie-banner role="dialog" aria-modal="false" aria-labelledby="cookie-banner-title">
+      <section class="cookie-banner" data-cookie-banner role="region" aria-labelledby="cookie-banner-title" aria-describedby="cookie-banner-description">
         <div class="cookie-banner-copy">
           <p class="eyebrow">Tu privacidad</p>
           <h2 id="cookie-banner-title">Cookies y contenido externo</h2>
-          <p>Usamos almacenamiento necesario para recordar tu elección. Las preferencias del catálogo y Google Maps permanecen desactivados hasta que los autorices. <a href="/cookies/">Más información</a>.</p>
+          <p id="cookie-banner-description">Usamos almacenamiento necesario para recordar tu elección. Las preferencias del catálogo y Google Maps permanecen desactivados hasta que los autorices. <a href="/cookies/">Más información</a>.</p>
         </div>
         <div class="cookie-banner-actions">
           <button type="button" class="cookie-action" data-cookie-reject>Rechazar todas</button>
@@ -124,12 +144,12 @@
         </div>
       </section>
       <div class="cookie-modal-backdrop" data-cookie-modal-backdrop hidden>
-        <section class="cookie-modal" data-cookie-modal role="dialog" aria-modal="true" aria-labelledby="cookie-modal-title">
+        <section class="cookie-modal" data-cookie-modal role="dialog" aria-modal="true" aria-labelledby="cookie-modal-title" aria-describedby="cookie-modal-description" tabindex="-1">
           <div class="cookie-modal-header">
             <div><p class="eyebrow">Centro de privacidad</p><h2 id="cookie-modal-title">Configurar cookies</h2></div>
             <button type="button" class="cookie-close" data-cookie-close aria-label="Cerrar configuración">×</button>
           </div>
-          <p>Puedes cambiar esta decisión cuando quieras desde el pie de página.</p>
+          <p id="cookie-modal-description">Puedes cambiar esta decisión cuando quieras desde el pie de página.</p>
           <div class="cookie-options">
             <div class="cookie-option">
               <div><h3>Necesarias</h3><p>Recuerdan tu decisión y permiten funciones básicas de la web.</p></div>
@@ -162,11 +182,16 @@
   const externalInput = document.querySelector('[data-consent-external]');
   let lastFocused = null;
 
-  function closeConsentUi() {
-    if (banner) banner.hidden = true;
+  function closePreferences({ restoreFocus = true } = {}) {
     if (backdrop) backdrop.hidden = true;
     document.body.classList.remove('cookie-modal-open');
-    if (lastFocused && typeof lastFocused.focus === 'function') lastFocused.focus();
+    if (restoreFocus && lastFocused && typeof lastFocused.focus === 'function') lastFocused.focus();
+    lastFocused = null;
+  }
+
+  function closeConsentUi() {
+    if (banner) banner.hidden = true;
+    closePreferences();
   }
 
   function openPreferences() {
@@ -187,7 +212,8 @@
       iframe.title = 'Ubicación de Sillas Juan y Lola en Écija';
       iframe.src = 'https://www.google.com/maps?q=C%2F%20Isla%20de%20Albor%C3%A1n%2022%2C%2041400%20%C3%89cija%2C%20Sevilla&output=embed';
       iframe.loading = 'lazy';
-      iframe.referrerPolicy = 'no-referrer-when-downgrade';
+      iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+      iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox');
       container.replaceChildren(iframe);
       container.dataset.loaded = 'true';
     });
@@ -201,7 +227,7 @@
   document.querySelector('[data-cookie-reject]')?.addEventListener('click', () => saveConsent({ functional: false, external: false }));
   document.querySelector('[data-cookie-accept]')?.addEventListener('click', () => saveConsent({ functional: true, external: true }));
   document.querySelector('[data-cookie-configure]')?.addEventListener('click', openPreferences);
-  document.querySelector('[data-cookie-close]')?.addEventListener('click', () => { if (backdrop) backdrop.hidden = true; document.body.classList.remove('cookie-modal-open'); });
+  document.querySelector('[data-cookie-close]')?.addEventListener('click', () => closePreferences());
   document.querySelector('[data-cookie-save]')?.addEventListener('click', () => saveConsent({ functional: functionalInput.checked, external: externalInput.checked }));
   document.querySelector('[data-cookie-modal-reject]')?.addEventListener('click', () => saveConsent({ functional: false, external: false }));
 
@@ -215,16 +241,31 @@
   });
 
   backdrop?.addEventListener('click', (event) => {
-    if (event.target === backdrop) {
-      backdrop.hidden = true;
-      document.body.classList.remove('cookie-modal-open');
-    }
+    if (event.target === backdrop) closePreferences();
   });
 
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && backdrop && !backdrop.hidden) {
-      backdrop.hidden = true;
-      document.body.classList.remove('cookie-modal-open');
+      closePreferences();
+      return;
+    }
+    if (event.key === 'Tab' && backdrop && !backdrop.hidden && modal) {
+      const focusable = [...modal.querySelectorAll('button:not([disabled]), input:not([disabled]), a[href]')]
+        .filter((element) => !element.hidden && element.getClientRects().length > 0);
+      if (!focusable.length) {
+        event.preventDefault();
+        modal.focus();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     }
   });
 

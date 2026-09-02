@@ -26,7 +26,7 @@ Web estática, sin dependencias ni proceso de compilación, preparada para despl
 La versión entregada solo utiliza:
 
 - `juan-lola-consent-v1`: almacenamiento necesario para recordar la decisión de privacidad, máximo 12 meses.
-- `juan-lola-selection`: almacenamiento funcional opcional para recordar la lista del catálogo, máximo 30 días.
+- `juan-lola-selection-v2`: almacenamiento funcional opcional para recordar la lista del catálogo, máximo 30 días.
 - Google Maps: no se carga hasta que se autoriza el contenido externo o se pulsa **Cargar mapa**.
 
 No se han integrado herramientas de analítica, píxeles publicitarios ni formularios que envíen datos a un backend. El formulario abre WhatsApp con un borrador que el usuario revisa antes de enviarlo.
@@ -40,6 +40,14 @@ python3 -m http.server 8000
 ```
 
 Abrir `http://localhost:8000`.
+
+## Verificación de calidad
+
+```bash
+npm run check
+```
+
+El quality gate valida sintaxis JavaScript, rutas y recursos internos, enlaces externos seguros, estructura HTML, cobertura del sitemap, integridad de las 81 composiciones del catálogo y la política CSP/cabeceras de seguridad.
 
 ## Desplegar en Vercel
 

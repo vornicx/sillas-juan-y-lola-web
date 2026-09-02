@@ -48,14 +48,14 @@
   <form class="contact-form" data-contact-form novalidate>
     <h2>Pedid vuestro presupuesto</h2><p class="form-intro">Cuéntanos lo esencial. Al enviar, se abrirá WhatsApp con la solicitud preparada para revisar antes de mandarla.</p>
     <div class="form-grid">
-      <label><span>Nombre *</span><input name="name" autocomplete="name" required></label>
-      <label><span>Teléfono *</span><input name="phone" type="tel" autocomplete="tel" required></label>
-      <label><span>Correo electrónico</span><input name="email" type="email" autocomplete="email"></label>
+      <label><span>Nombre *</span><input name="name" autocomplete="name" maxlength="80" required></label>
+      <label><span>Teléfono *</span><input name="phone" type="tel" autocomplete="tel" inputmode="tel" maxlength="30" required></label>
+      <label><span>Correo electrónico</span><input name="email" type="email" autocomplete="email" maxlength="254"></label>
       <label><span>Fecha del evento</span><input name="date" type="date"></label>
-      <label><span>N.º de invitados</span><input name="guests" type="number" min="1" inputmode="numeric"></label>
-      <label><span>Localidad del evento</span><input name="location" autocomplete="address-level2"></label>
+      <label><span>N.º de invitados</span><input name="guests" type="number" min="1" max="999999" inputmode="numeric"></label>
+      <label><span>Localidad del evento</span><input name="location" autocomplete="address-level2" maxlength="120"></label>
     </div>
-    <label><span>Material que necesitáis</span><textarea name="material" rows="5" placeholder="Sillas, mesas, mantelería, cristalería…"></textarea></label>
+    <label><span>Material que necesitáis</span><textarea name="material" rows="5" maxlength="1000" placeholder="Sillas, mesas, mantelería, cristalería…"></textarea></label>
     <label class="privacy-check"><input type="checkbox" name="privacy" value="accepted" required><span>He leído la <a href="/privacidad/" target="_blank" rel="noreferrer">política de privacidad</a>. *</span></label>
     <div class="privacy-first-layer"><strong>Información básica sobre protección de datos:</strong> responsable, VILLAR PEREZ ALQUILERES S.L.U.; finalidad, responder y preparar el presupuesto solicitado; legitimación, aplicación de medidas precontractuales solicitadas por ti; destinatarios, proveedores necesarios y WhatsApp cuando elijas ese canal; derechos, acceso, rectificación, supresión y demás derechos indicados en la política de privacidad.</div>
     <p class="form-error" data-form-error role="alert"></p>
